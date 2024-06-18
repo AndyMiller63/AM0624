@@ -5,8 +5,9 @@ VALUES
 
 INSERT INTO Users (username, password, role)
 VALUES
-    ('admin', '$2a$10$7h/aNCe/Xa8YcNxxc4NsdO6M9C5jW7DXCl9zCzK6z1.AzzJgQF5UW', 'ADMIN'),
-    ('user', '$2a$10$7h/aNCe/Xa8YcNxxc4NsdO6M9C5jW7DXCl9zCzK6z1.AzzJgQF5UW', 'USER');
+    ('admin', '$2a$10$bduukYecKVGKAWyb9uIhHO.zAsjomrIhjuEHGuU60DGliI/Y1g6WC', 'ADMIN'),
+    ('user', '$2a$10$bduukYecKVGKAWyb9uIhHO.zAsjomrIhjuEHGuU60DGliI/Y1g6WC', 'USER');
+
 
 INSERT INTO Brands (brand_name)
 VALUES
