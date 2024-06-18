@@ -1,13 +1,17 @@
 package com.windmill.rentalservice.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class RentalDto implements Serializable {
     @Schema(description = "Rental ID", example = "1")
     Long rentalId;
@@ -41,6 +45,5 @@ public class RentalDto implements Serializable {
 
     @Schema(description = "Final charge", example = "7.16")
     BigDecimal finalCharge;
-
 
 }
