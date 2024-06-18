@@ -76,10 +76,10 @@ public class Holiday {
                 break;
             case ANNUAL:
                 observedDate = LocalDate.of(LocalDate.now().getYear(), month, dayOfMonth);
-                break;
+                return adjustForWeekend(observedDate);
         }
 
-        return adjustForWeekend(observedDate);
+        return observedDate;
     }
 
     /**
