@@ -8,12 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 /**
- * Service class for handling inventory related operations.
+ * Service class for managing tool inventory.
  */
 @Service
+@Transactional
 public class InventoryService {
 
     private final ToolQuantityRepository toolQuantityRepository;
@@ -23,31 +22,35 @@ public class InventoryService {
         this.toolQuantityRepository = toolQuantityRepository;
     }
 
-    @Transactional
+    /**
+     * Checks out a tool by decreasing its quantity.
+     *
+     * @param toolId the ID of the tool to check out
+     * @return the updated ToolQuantity
+     * @throws RuntimeException if the tool is not available
+     */
+    @Transactional(readOnly = false)
     public ToolQuantity checkoutTool(Long toolId) {
-        Optional<ToolQuantity> toolQuantityOpt = toolQuantityRepository.findByToolId(toolId);
-        if (toolQuantityOpt.isPresent()) {
-            ToolQuantity toolQuantity = toolQuantityOpt.get();
-            if (toolQuantity.getInStockCount() > 0) {
-                toolQuantity.setInStockCount(toolQuantity.getInStockCount() - 1);
-                return toolQuantityRepository.save(toolQuantity);
-            } else {
-                throw new RentalCreationException(AppConstants.TOOL_NOT_AVAILABLE+toolId);
-            }
-        } else {
-            throw new RentalCreationException(AppConstants.TOOL_NOT_FOUND+toolId);
+        ToolQuantity toolQuantity = toolQuantityRepository.findByToolId(toolId)
+                .orElseThrow(() -> new RuntimeException(AppConstants.TOOL_NOT_FOUND + toolId));
+        if (toolQuantity.getInStockCount() <= 0) {
+            throw new RentalCreationException(AppConstants.TOOL_NOT_AVAILABLE);
         }
+        toolQuantity.setInStockCount(toolQuantity.getInStockCount() - 1);
+        return toolQuantityRepository.save(toolQuantity);
     }
 
-    @Transactional
+    /**
+     * Returns a tool by increasing its quantity.
+     *
+     * @param toolId the ID of the tool to return
+     * @return the updated ToolQuantity
+     */
+    @Transactional(readOnly = false)
     public ToolQuantity returnTool(Long toolId) {
-        Optional<ToolQuantity> toolQuantityOpt = toolQuantityRepository.findByToolId(toolId);
-        if (toolQuantityOpt.isPresent()) {
-            ToolQuantity toolQuantity = toolQuantityOpt.get();
-            toolQuantity.setInStockCount(toolQuantity.getInStockCount() + 1);
-            return toolQuantityRepository.save(toolQuantity);
-        } else {
-            throw new RuntimeException(AppConstants.TOOL_NOT_FOUND+toolId);
-        }
+        ToolQuantity toolQuantity = toolQuantityRepository.findByToolId(toolId)
+                .orElseThrow(() -> new RuntimeException(AppConstants.TOOL_NOT_FOUND + toolId));
+        toolQuantity.setInStockCount(toolQuantity.getInStockCount() + 1);
+        return toolQuantityRepository.save(toolQuantity);
     }
 }

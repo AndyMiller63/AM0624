@@ -1,5 +1,7 @@
 package com.windmill.rentalservice.exception;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,6 +19,7 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     // Handle specific exceptions
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<Object> handleUsernameNotFoundException(UsernameNotFoundException ex, WebRequest request) {
@@ -41,7 +44,7 @@ public class GlobalExceptionHandler {
         PrintWriter pw = new PrintWriter(sw);
         ex.printStackTrace(pw);
         String stackTrace = sw.toString();
-        System.out.println("StackTrace: "+stackTrace);
+        logger.error("StackTrace: "+stackTrace);
         body.put("message", ex.getMessage());
         body.put("path", request.getDescription(false).replace("uri=", ""));
 

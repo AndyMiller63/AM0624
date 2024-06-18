@@ -5,6 +5,7 @@ import com.windmill.rentalservice.dto.CustomerDto;
 import com.windmill.rentalservice.mapper.CustomerMapper;
 import com.windmill.rentalservice.model.Customer;
 import com.windmill.rentalservice.repository.CustomerRepository;
+import com.windmill.rentalservice.util.AppConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,7 +64,7 @@ public class CustomerService {
             Customer updatedCustomer = customerRepository.save(existingCustomer);
             return customerMapper.toDto(updatedCustomer);
         } else {
-            throw new RuntimeException("Customer not found with id: " + id);
+            throw new RuntimeException(AppConstants.CUSTOMER_NOT_FOUND_ERROR + id);
         }
     }
 
@@ -76,7 +77,7 @@ public class CustomerService {
         if (customerRepository.existsById(id)) {
             customerRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Customer not found with id: " + id);
+            throw new RuntimeException(AppConstants.CUSTOMER_NOT_FOUND_ERROR + id);
         }
     }
 
@@ -89,7 +90,7 @@ public class CustomerService {
     @Transactional(readOnly = true)
     public CustomerDto getCustomerById(Long id) {
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Customer not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException(AppConstants.CUSTOMER_NOT_FOUND_ERROR + id));
         return customerMapper.toDto(customer);
     }
 

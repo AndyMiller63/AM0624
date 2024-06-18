@@ -1,9 +1,11 @@
 package com.windmill.rentalservice.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Setter
+@Getter
 @Entity
 @Table(name = "brands")
 public class Brand { //extends AbstractAuditable<User, Long> {

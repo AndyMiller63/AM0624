@@ -1,17 +1,20 @@
 package com.windmill.rentalservice.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Data
+@Setter
+@Getter
 @Entity
 @Table(name = "rentals")
 public class Rental {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "rental_id", nullable = false)
     private Long rentalId;
 
     @Column(name = "tool_id", nullable = false)

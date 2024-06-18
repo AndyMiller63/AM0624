@@ -4,12 +4,17 @@ import com.windmill.rentalservice.dto.ToolTypeDto;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.Month;
 
 /**
  * Utility class for calculating chargeable days based on tool type and rental period.
  */
 public class CalculateChargeDays {
+
+    private final HolidayService holidayService;
+    CalculateChargeDays(HolidayService holidayService) {
+
+        this.holidayService = holidayService;
+    }
 
     /**
      * Enum to represent different types of days.
@@ -73,60 +78,15 @@ public class CalculateChargeDays {
     }
 
     /**
-     * Static method to determine if a date is the first Monday of September.
-     *
-     * @param dayOfMonth int representing the day of the month
-     * @param month Month representing the month
-     * @param dayOfWeek DayOfWeek representing the day of the week
-     * @return boolean indicating if the date is the first Monday of September
-     */
-    public static boolean isFirstMondayOfSeptember(int dayOfMonth, Month month, DayOfWeek dayOfWeek) {
-        return month == Month.SEPTEMBER && dayOfWeek == DayOfWeek.MONDAY && dayOfMonth <= 7;
-    }
-
-    /**
      * Helper method to determine if a date is a holiday.
      *
      * @param date LocalDate representing the date to check
      * @return boolean indicating if the date is a holiday
      */
     private boolean isHoliday(LocalDate date) {
-        Month month = date.getMonth();
-        int dayOfMonth = date.getDayOfMonth();
-        DayOfWeek dayOfWeek = date.getDayOfWeek();
-
-        // Check for Independence Day holiday
-        if (month == Month.JULY && isIndependenceDayHoliday(dayOfMonth, dayOfWeek)) {
-            return true;
-        }
-
-        // Check for Labor Day holiday
-        return isFirstMondayOfSeptember(dayOfMonth, month, dayOfWeek);
+        return holidayService.isHoliday(date);
     }
 
-    /**
-     * Helper method to determine if a date is the Independence Day holiday.
-     *
-     * @param dayOfMonth int representing the day of the month
-     * @param dayOfWeek DayOfWeek representing the day of the week
-     * @return boolean indicating if the date is the Independence Day holiday
-     */
-    private boolean isIndependenceDayHoliday(int dayOfMonth, DayOfWeek dayOfWeek) {
-        if (dayOfMonth == 4) {
-            return dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY;
-        }
-        if (dayOfMonth == 3) {
-            return dayOfWeek == DayOfWeek.FRIDAY;
-        }
-        return dayOfMonth == 5 && dayOfWeek == DayOfWeek.MONDAY;
-    }
-
-    /**
-     * Helper method to determine if a date is a weekend.
-     *
-     * @param date LocalDate representing the date to check
-     * @return boolean indicating if the date is a weekend
-     */
     private boolean isWeekend(LocalDate date) {
         DayOfWeek dayOfWeek = date.getDayOfWeek();
         return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;

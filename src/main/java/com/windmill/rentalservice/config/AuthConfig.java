@@ -36,10 +36,10 @@ public class AuthConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/v1/auth/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/swagger-ui/index.html").permitAll()
-                        // !!!-->REMOVE TO ENABLE SECURITY<--!!!
-                        //.requestMatchers("/api/v1/**").permitAll()
-
+                        .requestMatchers("/api/v1/auth/login").permitAll()
+                        .requestMatchers("/api/v1/auth/register").hasRole("ADMIN")
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
+                                "/swagger-ui/index.html").permitAll()
                         // Admin Access-All
                         .requestMatchers("/api/v1/**").hasRole("ADMIN")
                         // Users can read everything

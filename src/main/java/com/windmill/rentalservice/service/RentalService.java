@@ -10,8 +10,6 @@ import com.windmill.rentalservice.model.*;
 import com.windmill.rentalservice.repository.*;
 import com.windmill.rentalservice.util.AppConstants;
 import com.windmill.rentalservice.util.Utility;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,11 +24,12 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 
+/**
+ * Service class for handling rental operations.
+ */
 @Service
 @Transactional
 public class RentalService {
-
-    private static final Logger logger = LoggerFactory.getLogger(RentalService.class);
 
     private final ToolRepository toolRepository;
     private final ToolService toolService;
@@ -44,6 +43,21 @@ public class RentalService {
     private final HolidayRepository holidayRepository;
     private final HolidayService holidayService;
 
+    /**
+     * Constructor for RentalService.
+     *
+     * @param toolService             the ToolService
+     * @param toolTypeService         the ToolTypeService
+     * @param toolRepository          the ToolRepository
+     * @param toolTypeRepository      the ToolTypeRepository
+     * @param brandRepository         the BrandRepository
+     * @param inventoryService        the InventoryService
+     * @param rentalRepository        the RentalRepository
+     * @param rentalMapper            the RentalMapper
+     * @param toolQuantityRepository  the ToolQuantityRepository
+     * @param holidayRepository       the HolidayRepository
+     * @param holidayService          the HolidayService
+     */
     @Autowired
     public RentalService(ToolService toolService, ToolTypeService toolTypeService,
                          ToolRepository toolRepository, ToolTypeRepository toolTypeRepository,
@@ -64,18 +78,29 @@ public class RentalService {
         this.holidayService = holidayService;
     }
 
+    /**
+     * Creates a new rental.
+     *
+     * @param createRentalDto the DTO containing rental creation data
+     * @return the created RentalDto
+     * @throws Exception if an error occurs during rental creation
+     */
     public RentalDto createRental(CreateRentalDto createRentalDto) throws Exception {
-        logger.debug(AppConstants.RENTAL_CREATE_DEBUG, createRentalDto);
         Rental rental = checkout(createRentalDto.getToolId(), createRentalDto.getCustomerId(),
                 createRentalDto.getRentalDays(), createRentalDto.getDiscountPercent(),
                 createRentalDto.getCheckoutDateString());
         Rental savedRental = rentalRepository.save(rental);
-        logger.info(AppConstants.RENTAL_CREATE_INFO, savedRental.getRentalId());
         return rentalMapper.toDto(savedRental);
     }
 
+    /**
+     * Updates an existing rental.
+     *
+     * @param id         the rental ID
+     * @param rentalDto  the DTO containing rental data
+     * @return the updated RentalDto
+     */
     public RentalDto updateRental(Long id, RentalDto rentalDto) {
-        logger.debug(AppConstants.RENTAL_UPDATE_DEBUG, id, rentalDto);
         Optional<Rental> existingRentalOpt = rentalRepository.findById(id);
         if (existingRentalOpt.isPresent()) {
             Rental existingRental = existingRentalOpt.get();
@@ -83,154 +108,214 @@ public class RentalService {
             existingRental.setCustomerId(rentalDto.getCustomerId());
             existingRental.setCheckoutDate(rentalDto.getCheckoutDate());
             Rental updatedRental = rentalRepository.save(existingRental);
-            logger.info(AppConstants.RENTAL_UPDATE_INFO, updatedRental.getRentalId());
             return rentalMapper.toDto(updatedRental);
         } else {
-            throw new RuntimeException(format(AppConstants.RENTAL_NOT_FOUND, id));
+            throw new RuntimeException(AppConstants.RENTAL_NOT_FOUND_WITH_ID + id);
         }
     }
 
+    /**
+     * Deletes a rental by ID.
+     *
+     * @param id the rental ID
+     */
     public void deleteRental(Long id) {
-        logger.debug(AppConstants.RENTAL_DELETE_DEBUG, id);
         if (rentalRepository.existsById(id)) {
             rentalRepository.deleteById(id);
-            logger.info(AppConstants.RENTAL_DELETE_INFO, id);
         } else {
-            throw new RuntimeException(format(AppConstants.RENTAL_NOT_FOUND, id));
+            throw new RuntimeException(AppConstants.RENTAL_NOT_FOUND_WITH_ID + id);
         }
     }
 
+    /**
+     * Retrieves a rental by ID.
+     *
+     * @param id the rental ID
+     * @return the RentalDto
+     */
     @Transactional(readOnly = true)
     public RentalDto getRentalById(Long id) {
-        logger.debug(AppConstants.RENTAL_FETCH_DEBUG, id);
         Rental rental = rentalRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException(format(AppConstants.RENTAL_NOT_FOUND, id)));
-        logger.info(AppConstants.RENTAL_FETCH_INFO, id);
+                .orElseThrow(() -> new RuntimeException(AppConstants.RENTAL_NOT_FOUND_WITH_ID + id));
         return rentalMapper.toDto(rental);
     }
 
+    /**
+     * Retrieves all rentals.
+     *
+     * @return a list of RentalDto
+     */
     @Transactional(readOnly = true)
     public List<RentalDto> getAllRentals() {
-        logger.debug(AppConstants.RENTAL_FETCH_ALL_DEBUG);
-        List<RentalDto> rentals = rentalRepository.findAll().stream()
+        return rentalRepository.findAll().stream()
                 .map(rentalMapper::toDto)
                 .collect(Collectors.toList());
-        logger.info(AppConstants.RENTAL_FETCH_ALL_INFO, rentals.size());
-        return rentals;
     }
 
+    /**
+     * Finds rentals by tool ID.
+     *
+     * @param toolId the tool ID
+     * @return a list of RentalDto
+     */
     @Transactional(readOnly = true)
     public List<RentalDto> findRentalsByToolId(Long toolId) {
-        logger.debug(AppConstants.RENTAL_FETCH_TOOLID_DEBUG, toolId);
-        List<RentalDto> rentals = rentalRepository.findByToolId(toolId).stream()
+        return rentalRepository.findByToolId(toolId).stream()
                 .map(rentalMapper::toDto)
                 .collect(Collectors.toList());
-        logger.info(AppConstants.RENTAL_FETCH_TOOLID_INFO, rentals.size(), toolId);
-        return rentals;
     }
 
+    /**
+     * Finds rentals by tool code.
+     *
+     * @param toolCode the tool code
+     * @return a list of RentalDto
+     */
     @Transactional(readOnly = true)
     public List<RentalDto> findRentalsByToolCode(String toolCode) {
-        logger.debug(AppConstants.RENTAL_FETCH_TOOLCODE_DEBUG, toolCode);
-        List<RentalDto> rentals = rentalRepository.findRentalsByToolCode(toolCode).stream()
+        return rentalRepository.findRentalsByToolCode(toolCode).stream()
                 .map(rentalMapper::toDto)
                 .collect(Collectors.toList());
-        logger.info(AppConstants.RENTAL_FETCH_TOOLCODE_INFO, rentals.size(), toolCode);
-        return rentals;
     }
 
+    /**
+     * Finds rentals by customer ID.
+     *
+     * @param customerId the customer ID
+     * @return a list of RentalDto
+     */
     @Transactional(readOnly = true)
     public List<RentalDto> findRentalsByCustomerId(Long customerId) {
-        logger.debug(AppConstants.RENTAL_FETCH_CUSTOMERID_DEBUG, customerId);
-        List<RentalDto> rentals = rentalRepository.findByCustomerId(customerId).stream()
+        return rentalRepository.findByCustomerId(customerId).stream()
                 .map(rentalMapper::toDto)
                 .collect(Collectors.toList());
-        logger.info(AppConstants.RENTAL_FETCH_CUSTOMERID_INFO, rentals.size(), customerId);
-        return rentals;
     }
 
+    /**
+     * Finds rentals by customer name.
+     *
+     * @param name the customer name
+     * @return a list of RentalDto
+     */
     @Transactional(readOnly = true)
     public List<RentalDto> findRentalsByCustomerName(String name) {
-        logger.debug(AppConstants.RENTAL_FETCH_CUSTOMERNAME_DEBUG, name);
-        List<RentalDto> rentals = rentalRepository.findRentalsByCustomerName(name).stream()
+        return rentalRepository.findRentalsByCustomerName(name).stream()
                 .map(rentalMapper::toDto)
                 .collect(Collectors.toList());
-        logger.info(AppConstants.RENTAL_FETCH_CUSTOMERNAME_INFO, rentals.size(), name);
-        return rentals;
     }
 
+    /**
+     * Finds rentals by customer contact.
+     *
+     * @param contact the customer contact
+     * @return a list of RentalDto
+     */
     @Transactional(readOnly = true)
     public List<RentalDto> findRentalsByCustomerContact(String contact) {
-        logger.debug(AppConstants.RENTAL_FETCH_CUSTOMERCONTACT_DEBUG, contact);
-        List<RentalDto> rentals = rentalRepository.findRentalsByCustomerContact(contact).stream()
+        return rentalRepository.findRentalsByCustomerContact(contact).stream()
                 .map(rentalMapper::toDto)
                 .collect(Collectors.toList());
-        logger.info(AppConstants.RENTAL_FETCH_CUSTOMERCONTACT_INFO, rentals.size(), contact);
-        return rentals;
     }
 
+    /**
+     * Finds rentals by rental date.
+     *
+     * @param checkoutDate the rental date
+     * @return a list of RentalDto
+     */
     @Transactional(readOnly = true)
     public List<RentalDto> findRentalsByRentalDate(LocalDate checkoutDate) {
-        logger.debug(AppConstants.RENTAL_FETCH_RENTALDATE_DEBUG, checkoutDate);
-        List<RentalDto> rentals = rentalRepository.findByCheckoutDate(checkoutDate).stream()
+        return rentalRepository.findByCheckoutDate(checkoutDate).stream()
                 .map(rentalMapper::toDto)
                 .collect(Collectors.toList());
-        logger.info(AppConstants.RENTAL_FETCH_RENTALDATE_INFO, rentals.size(), checkoutDate);
-        return rentals;
     }
 
-    public ToolDto validateInputsAndReturnTool(Long toolId, int rentalDays, int discountPercent, String checkoutDateString) throws Exception {
-        logger.debug(AppConstants.VALIDATING_INPUTS, toolId);
+    /**
+     * Validates inputs and returns the corresponding tool.
+     *
+     * @param toolId             the tool ID
+     * @param rentalDays         the rental days
+     * @param discountPercent    the discount percent
+     * @param checkoutDateString the checkout date string
+     * @return the ToolDto
+     * @throws Exception if validation fails
+     */
+    ToolDto validateInputsAndReturnTool(Long toolId, int rentalDays, int discountPercent, String checkoutDateString) throws Exception {
+        // Validate inputs
+        // min of 1 rentalDays
         if (rentalDays < 1) {
-            throw new RentalCreationException(AppConstants.RENTAL_DAY_COUNT_INVALID);
+            throw new RentalCreationException(AppConstants.RENTAL_DAY_COUNT_ERROR);
         }
+        // don't allow negative discount or greater than 100%
         if (discountPercent < 0 || discountPercent > 100) {
-            throw new RentalCreationException(AppConstants.DISCOUNT_PERCENT_INVALID);
+            throw new RentalCreationException(AppConstants.DISCOUNT_PERCENT_ERROR);
         }
+        // we need to this check and make sure the date is ok. Just calling LocalDate.parse("02/29/01", ...),
+        // (there are no leap day that year) returns 02/28/01, as opposed to an exception
         if (!Utility.isDateValid(checkoutDateString)) {
-            throw new RentalCreationException(AppConstants.DATE_NOT_VALID);
+            throw new RentalCreationException(AppConstants.DATE_NOT_VALID_ERROR);
         }
+        // make sure tool exists
         ToolDto toolDto = toolService.getToolById(toolId);
         if (toolDto == null) {
-            throw new RentalCreationException(format(AppConstants.TOOL_NOT_RECOGNIZED, toolId));
+            throw new RentalCreationException(format(AppConstants.TOOL_ID_NOT_RECOGNIZED, toolId));
         }
         return toolDto;
     }
 
+    /**
+     * Checks out a tool and creates a rental agreement.
+     *
+     * @param toolId             the tool ID
+     * @param customerId         the customer ID
+     * @param rentalDays         the rental days
+     * @param discountPercent    the discount percent
+     * @param checkoutDateString the checkout date string
+     * @return the Rental
+     * @throws Exception if an error occurs during checkout
+     */
     @Transactional(readOnly = false)
     public Rental checkout(Long toolId, Long customerId, int rentalDays, int discountPercent, String checkoutDateString) throws Exception {
+        // validate the inputs and return the tool
         ToolDto toolDto = validateInputsAndReturnTool(toolId, rentalDays, discountPercent, checkoutDateString);
         ToolTypeDto toolTypeDto = toolTypeService.getToolTypeById(toolDto.getToolTypeId());
         ToolQuantity toolQuantity = inventoryService.checkoutTool(toolId);
+        // Parse checkout date
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(AppConstants.RENTAL_CHECKOUT_DATE_FORMAT);
+        //convert String to LocalDate
         LocalDate checkoutDate = LocalDate.parse(checkoutDateString, formatter);
+        // calculate due date
         LocalDate dueDate = checkoutDate.plusDays(rentalDays);
-        int chargeDays = new CalculateChargeDays().getChargeDaysCount(toolTypeDto, checkoutDate, rentalDays);
+        // Calculate charge days
+        int chargeDays = new CalculateChargeDays(holidayService).getChargeDaysCount(toolTypeDto, checkoutDate, rentalDays);
+        // Calculate charges
         BigDecimal dailyCharge = BigDecimal.valueOf(toolTypeDto.getDailyCharge());
         BigDecimal preDiscountCharge = dailyCharge.multiply(new BigDecimal(chargeDays));
         BigDecimal discountAmount = preDiscountCharge
                 .multiply(new BigDecimal(discountPercent))
                 .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
         BigDecimal finalCharge = preDiscountCharge.subtract(discountAmount);
-        Rental rental = new Rental(toolId, customerId, rentalDays, checkoutDate, dueDate, chargeDays, preDiscountCharge, discountPercent, discountAmount, finalCharge);
+        // Create and return the rental agreement
+        Rental rental =  new Rental(toolId, customerId, rentalDays, checkoutDate, dueDate, chargeDays, preDiscountCharge, discountPercent, discountAmount, finalCharge);
         printRental(rental);
         return rental;
     }
 
+    /**
+     * Prints the rental agreement details.
+     *
+     * @param rental the Rental
+     */
     private void printRental(Rental rental) {
+
         Tool tool = toolRepository.findToolByToolId(rental.getToolId()).orElse(null);
         ToolType toolType = toolTypeRepository.findToolTypeByToolTypeId(tool.getToolTypeId()).orElse(null);
         Brand brand = brandRepository.findBrandByBrandId(tool.getBrandId()).orElse(null);
         String dailyCharge = Utility.currencyFormat(BigDecimal.valueOf(toolType.getDailyCharge()));
 
+        // Format the rental agreement details here
         System.out.printf(
-                AppConstants.RENTAL_PRINT_HEADER +
-                        AppConstants.RENTAL_PRINT_CHECKOUT_DATE +
-                        AppConstants.RENTAL_PRINT_INCURS_COSTS +
-                        AppConstants.RENTAL_PRINT_RENTAL_DAYS +
-                        AppConstants.RENTAL_PRINT_PRE_DISCOUNT_CHARGE +
-                        AppConstants.RENTAL_PRINT_DISCOUNT +
-                        AppConstants.RENTAL_PRINT_FINAL_CHARGE,
+                AppConstants.RENTAL_AGREEMENT_DETAILS,
                 tool.getToolCode(), brand.getBrandName(), toolType.getToolTypeName(),
                 Utility.dateFormat(rental.getCheckoutDate()), rental.getRentalDays(), Utility.dateFormat(rental.getDueDate()),
                 Utility.yesNo(toolType.isWeekendCharge()), Utility.yesNo(toolType.isHolidayCharge()),
@@ -238,16 +323,24 @@ public class RentalService {
                 rental.getChargeDays(), dailyCharge, Utility.currencyFormat(rental.getPreDiscountCharge()),
                 rental.getDiscountPercent(), Utility.currencyFormat(rental.getDiscountAmount()),
                 Utility.currencyFormat(rental.getFinalCharge()));
+
     }
 
+    /**
+     * Returns a rented tool and updates the inventory.
+     *
+     * @param rentalId the rental ID
+     * @return the ToolQuantity
+     */
     @Transactional(readOnly = false)
     public ToolQuantity returnRental(Long rentalId) {
         Rental rental = rentalRepository.findRentalByRentalId(rentalId).orElse(null);
         if (rental == null) {
-            throw new RentalCreationException(AppConstants.UNABLE_TO_FIND_RENTAL + rentalId);
+            throw new RentalCreationException(AppConstants.RENTAL_NOT_FOUND_WITH_ID + rentalId);
         }
         Long toolId = rental.getToolId();
         ToolQuantity toolQuantity = inventoryService.returnTool(toolId);
         return toolQuantity;
     }
+
 }

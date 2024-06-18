@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,6 +13,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "users")
 
@@ -46,12 +49,6 @@ public class User implements UserDetails {
     }
 
     @Override
-    public String getUsername() {
-
-        return username;
-    }
-
-    @Override
     public boolean isAccountNonExpired() {
 
         return true;
@@ -73,36 +70,6 @@ public class User implements UserDetails {
     public boolean isEnabled() {
 
         return true;
-    }
-
-    public Long getUserId() {
-
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-
-        this.userId = userId;
-    }
-
-    public void setUsername(String username) {
-
-        this.username = username;
-    }
-
-    public void setPassword(String password) {
-
-        this.password = password;
-    }
-
-    public UserRole getRole() {
-
-        return role;
-    }
-
-    public void setRole(UserRole role) {
-
-        this.role = role;
     }
 
 }

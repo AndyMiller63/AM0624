@@ -5,6 +5,7 @@ import com.windmill.rentalservice.dto.ToolTypeDto;
 import com.windmill.rentalservice.mapper.ToolTypeMapper;
 import com.windmill.rentalservice.model.ToolType;
 import com.windmill.rentalservice.repository.ToolTypeRepository;
+import com.windmill.rentalservice.util.AppConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,12 +14,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for managing tool types.
+ */
 @Service
 @Transactional
 public class ToolTypeService {
 
-    private ToolTypeRepository toolTypeRepository;
-    private ToolTypeMapper toolTypeMapper;
+    private final ToolTypeRepository toolTypeRepository;
+    private final ToolTypeMapper toolTypeMapper;
 
     @Autowired
     public ToolTypeService(ToolTypeRepository toolTypeRepository, ToolTypeMapper toolTypeMapper) {
@@ -26,13 +30,26 @@ public class ToolTypeService {
         this.toolTypeMapper = toolTypeMapper;
     }
 
+    /**
+     * Creates a new tool type.
+     *
+     * @param createToolTypeDto the CreateToolTypeDto containing tool type details
+     * @return the created ToolTypeDto
+     */
     public ToolTypeDto createToolType(CreateToolTypeDto createToolTypeDto) {
         ToolType toolType = toolTypeMapper.toEntity(createToolTypeDto);
         ToolType savedToolType = toolTypeRepository.save(toolType);
         return toolTypeMapper.toDto(savedToolType);
     }
 
-    public ToolTypeDto updateToolType(long id, ToolTypeDto toolTypeDto) {
+    /**
+     * Updates an existing tool type.
+     *
+     * @param id the ID of the tool type to update
+     * @param toolTypeDto the ToolTypeDto containing updated tool type details
+     * @return the updated ToolTypeDto
+     */
+    public ToolTypeDto updateToolType(Long id, ToolTypeDto toolTypeDto) {
         Optional<ToolType> existingToolTypeOpt = toolTypeRepository.findById(id);
         if (existingToolTypeOpt.isPresent()) {
             ToolType existingToolType = existingToolTypeOpt.get();
@@ -44,39 +61,45 @@ public class ToolTypeService {
             ToolType updatedToolType = toolTypeRepository.save(existingToolType);
             return toolTypeMapper.toDto(updatedToolType);
         } else {
-            throw new RuntimeException("ToolType not found with id: " + id);
+            throw new RuntimeException(AppConstants.TOOL_TYPE_NOT_FOUND + id);
         }
     }
 
-    public void deleteToolType(long id) {
+    /**
+     * Deletes a tool type.
+     *
+     * @param id the ID of the tool type to delete
+     */
+    public void deleteToolType(Long id) {
         if (toolTypeRepository.existsById(id)) {
             toolTypeRepository.deleteById(id);
         } else {
-            throw new RuntimeException("ToolType not found with id: " + id);
+            throw new RuntimeException(AppConstants.TOOL_TYPE_NOT_FOUND + id);
         }
     }
 
+    /**
+     * Retrieves a tool type by its ID.
+     *
+     * @param id the ID of the tool type
+     * @return the ToolTypeDto
+     */
     @Transactional(readOnly = true)
-    public ToolTypeDto getToolTypeById(long id) {
+    public ToolTypeDto getToolTypeById(Long id) {
         ToolType toolType = toolTypeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("ToolType not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException(AppConstants.TOOL_TYPE_NOT_FOUND + id));
         return toolTypeMapper.toDto(toolType);
     }
 
+    /**
+     * Retrieves all tool types.
+     *
+     * @return a list of ToolTypeDto
+     */
     @Transactional(readOnly = true)
     public List<ToolTypeDto> getAllToolTypes() {
         return toolTypeRepository.findAll().stream()
                 .map(toolTypeMapper::toDto)
                 .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public ToolType getByToolTypeName(String toolTypeName) {
-        List<ToolType> toolTypes = toolTypeRepository.findByToolTypeName(toolTypeName);
-        if (toolTypes != null && toolTypes.size() > 0) {
-            return toolTypes.get(0);
-        } else {
-            return null;
-        }
     }
 }

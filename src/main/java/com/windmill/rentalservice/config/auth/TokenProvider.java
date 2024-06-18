@@ -19,8 +19,6 @@ public class TokenProvider {
     public TokenProvider() {
         this.jwtSecret = "ThisSpaceForRent"; //dotenv.get("JWT_SECRET");
         this.jwtExpirationMs = 3600000000L; //Long.parseLong(dotenv.get("JWT_EXPIRATION_MS"));
-        System.out.println("JWT_SECRET: " + this.jwtSecret);
-        System.out.println("JWT_EXPIRATION_MS: " + this.jwtExpirationMs);
     }
 
     /**

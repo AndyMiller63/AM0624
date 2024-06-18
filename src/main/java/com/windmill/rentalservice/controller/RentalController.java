@@ -3,11 +3,13 @@ package com.windmill.rentalservice.controller;
 import com.windmill.rentalservice.dto.CreateRentalDto;
 import com.windmill.rentalservice.dto.RentalDto;
 import com.windmill.rentalservice.service.RentalService;
+import com.windmill.rentalservice.util.AppConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +25,7 @@ public class RentalController {
 
     @Autowired
     public RentalController(RentalService rentalService) {
+
         this.rentalService = rentalService;
     }
 
@@ -165,4 +168,29 @@ public class RentalController {
         rentalService.deleteRental(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    /**
+     * Handle the return of a rental.
+     *
+     * @param rentalId the ID of the rental to return
+     * @return the updated tool quantity
+     */
+    @PostMapping("/return/{rentalId}")
+    @Operation(summary = "Return a rental", description = "Handles the return of a rental and updates the tool quantity")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Rental returned successfully"),
+            @ApiResponse(responseCode = "404", description = "Rental not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<?> returnRental(@PathVariable Long rentalId) {
+        try {
+            var toolQuantity = rentalService.returnRental(rentalId);
+            return ResponseEntity.ok(toolQuantity);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(AppConstants.RENTAL_NOT_FOUND_WITH_ID + rentalId);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("An error occurred while processing the return: " + e.getMessage());
+        }
+    }
+
 }
