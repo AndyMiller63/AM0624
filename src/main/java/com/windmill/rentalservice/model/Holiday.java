@@ -54,7 +54,7 @@ public class Holiday {
      * @return true if the date is a holiday, otherwise false
      */
     public boolean isHoliday(LocalDate date) {
-        LocalDate startDate = getObservedDate();
+        LocalDate startDate = getObservedDate(date);
         LocalDate endDate = startDate.plusDays(durationDays - 1);
         return !date.isBefore(startDate) && !date.isAfter(endDate);
     }
@@ -64,7 +64,7 @@ public class Holiday {
      *
      * @return the observed date
      */
-    public LocalDate getObservedDate() {
+    public LocalDate getObservedDate(LocalDate date) {
         LocalDate observedDate = null;
 
         switch (holidayType) {
@@ -72,10 +72,10 @@ public class Holiday {
                 observedDate = LocalDate.of(year, month, dayOfMonth);
                 break;
             case RELATIVE:
-                observedDate = calculateRelativeHoliday(year, month, weekOfMonth, dayOfWeek);
+                observedDate = calculateRelativeHoliday(date.getYear(), month, weekOfMonth, dayOfWeek);
                 break;
             case ANNUAL:
-                observedDate = LocalDate.of(LocalDate.now().getYear(), month, dayOfMonth);
+                observedDate = LocalDate.of(date.getYear(), month, dayOfMonth);
                 return adjustForWeekend(observedDate);
         }
 

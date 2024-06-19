@@ -75,5 +75,9 @@ CREATE TABLE Rentals (
                          FOREIGN KEY (customer_id) REFERENCES Customers(customer_id)
 );
 
-
+CREATE TABLE Settings (
+                           setting_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                           setting_key VARCHAR(50) NOT NULL,
+                           setting_value VARCHAR(100) NOT NULL
+);
 

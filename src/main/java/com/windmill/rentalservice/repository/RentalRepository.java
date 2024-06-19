@@ -13,6 +13,7 @@ public interface RentalRepository extends JpaRepository<Rental, Long> {
     List<Rental> findByToolId(Long toolId);
     List<Rental> findByCustomerId(Long customerId);
     List<Rental> findByCheckoutDate(LocalDate checkoutDate);
+    List<Rental> findByDueDate(LocalDate checkoutDate);
 
     @Query("SELECT r FROM Rental r JOIN Tool t ON r.toolId = t.toolId WHERE t.toolCode = :toolCode")
     List<Rental> findRentalsByToolCode(@Param("toolCode") String toolCode);

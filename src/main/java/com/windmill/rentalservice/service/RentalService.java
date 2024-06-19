@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -42,6 +41,8 @@ public class RentalService {
     private final ToolQuantityRepository toolQuantityRepository;
     private final HolidayRepository holidayRepository;
     private final HolidayService holidayService;
+    private final CustomerRepository customerRepository;
+
 
     /**
      * Constructor for RentalService.
@@ -64,7 +65,8 @@ public class RentalService {
                          BrandRepository brandRepository, InventoryService inventoryService,
                          RentalRepository rentalRepository, RentalMapper rentalMapper,
                          ToolQuantityRepository toolQuantityRepository,
-                         HolidayRepository holidayRepository, HolidayService holidayService) {
+                         HolidayRepository holidayRepository, HolidayService holidayService,
+                         CustomerRepository customerRepository) {
         this.toolService = toolService;
         this.toolTypeService = toolTypeService;
         this.toolRepository = toolRepository;
@@ -76,6 +78,7 @@ public class RentalService {
         this.toolQuantityRepository = toolQuantityRepository;
         this.holidayRepository = holidayRepository;
         this.holidayService = holidayService;
+        this.customerRepository = customerRepository;
     }
 
     /**
@@ -106,7 +109,7 @@ public class RentalService {
             Rental existingRental = existingRentalOpt.get();
             existingRental.setToolId(rentalDto.getToolId());
             existingRental.setCustomerId(rentalDto.getCustomerId());
-            existingRental.setCheckoutDate(rentalDto.getCheckoutDate());
+            existingRental.setCheckoutDate(Utility.stringToDate(rentalDto.getCheckoutDate()));
             Rental updatedRental = rentalRepository.save(existingRental);
             return rentalMapper.toDto(updatedRental);
         } else {
@@ -281,9 +284,7 @@ public class RentalService {
         ToolTypeDto toolTypeDto = toolTypeService.getToolTypeById(toolDto.getToolTypeId());
         ToolQuantity toolQuantity = inventoryService.checkoutTool(toolId);
         // Parse checkout date
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(AppConstants.RENTAL_CHECKOUT_DATE_FORMAT);
-        //convert String to LocalDate
-        LocalDate checkoutDate = LocalDate.parse(checkoutDateString, formatter);
+        LocalDate checkoutDate = Utility.stringToDate(checkoutDateString);
         // calculate due date
         LocalDate dueDate = checkoutDate.plusDays(rentalDays);
         // Calculate charge days

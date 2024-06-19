@@ -14,7 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -41,7 +40,7 @@ class RentalControllerTest {
     @BeforeEach
     void setUp() {
         rentalDto = new RentalDto(1L, 1L, 1L, 7, 10,
-                LocalDate.parse("2025-01-01"), LocalDate.parse("2025-01-08"), 5,
+                "01/01/24", "2025-01/08/24", 5,
                 BigDecimal.valueOf(100.0), BigDecimal.valueOf(10.0), BigDecimal.valueOf(90.0));
         createRentalDto = new CreateRentalDto(1L, 1L, 7, 10, "01/01/25");
     }

@@ -2,6 +2,7 @@ package com.windmill.rentalservice.mapper;
 
 import com.windmill.rentalservice.dto.RentalDto;
 import com.windmill.rentalservice.model.Rental;
+import com.windmill.rentalservice.util.Utility;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,8 +20,8 @@ public class RentalMapper {
         rentalDto.setCustomerId(rental.getCustomerId());
         rentalDto.setRentalDays(rental.getRentalDays());
         rentalDto.setDiscountPercent(rental.getDiscountPercent());
-        rentalDto.setCheckoutDate(rental.getCheckoutDate());
-        rentalDto.setDueDate(rental.getDueDate());
+        rentalDto.setCheckoutDate(Utility.dateFormat(rental.getCheckoutDate()));
+        rentalDto.setDueDate(Utility.dateFormat(rental.getDueDate()));
         rentalDto.setChargeDays(rental.getChargeDays());
         rentalDto.setPreDiscountCharge(rental.getPreDiscountCharge());
         rentalDto.setDiscountAmount(rental.getDiscountAmount());
@@ -42,8 +43,8 @@ public class RentalMapper {
         rental.setCustomerId(rentalDto.getCustomerId());
         rental.setRentalDays(rentalDto.getRentalDays());
         rental.setDiscountPercent(rentalDto.getDiscountPercent());
-        rental.setCheckoutDate(rentalDto.getCheckoutDate());
-        rental.setDueDate(rentalDto.getDueDate());
+        rental.setCheckoutDate(Utility.stringToDate(rentalDto.getCheckoutDate()));
+        rental.setDueDate(Utility.stringToDate(rentalDto.getDueDate()));
         rental.setChargeDays(rentalDto.getChargeDays());
         rental.setPreDiscountCharge(rentalDto.getPreDiscountCharge());
         rental.setDiscountAmount(rentalDto.getDiscountAmount());

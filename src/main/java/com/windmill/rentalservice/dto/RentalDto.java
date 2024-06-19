@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -28,11 +27,11 @@ public class RentalDto implements Serializable {
     @Schema(description = "Discount percent", example = "10")
     int discountPercent;
 
-    @Schema(description = "Checkout date", example = "2023-06-20")
-    LocalDate checkoutDate;
+    @Schema(description = "Checkout date", example = "06/20/24")
+    String checkoutDate;
 
-    @Schema(description = "Due date", example = "2023-06-25")
-    LocalDate dueDate;
+    @Schema(description = "Due date", example = "06/25/24")
+    String dueDate;
 
     @Schema(description = "Number of chargeable days", example = "4")
     int chargeDays;

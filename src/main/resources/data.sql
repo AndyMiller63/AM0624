@@ -44,3 +44,6 @@ VALUES
     ((SELECT tool_id FROM Tools WHERE tool_code = 'LADW'), 5),
     ((SELECT tool_id FROM Tools WHERE tool_code = 'JAKD'), 10),
     ((SELECT tool_id FROM Tools WHERE tool_code = 'JAKR'), 1);
+
+INSERT INTO Settings (setting_key, setting_value)
+VALUES ('notifyDueRentalsCron', '0 0 8 * * ?');
