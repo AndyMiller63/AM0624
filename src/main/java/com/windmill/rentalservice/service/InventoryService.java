@@ -3,7 +3,9 @@ package com.windmill.rentalservice.service;
 import com.windmill.rentalservice.exception.RentalCreationException;
 import com.windmill.rentalservice.model.ToolQuantity;
 import com.windmill.rentalservice.repository.ToolQuantityRepository;
+import com.windmill.rentalservice.repository.ToolRepository;
 import com.windmill.rentalservice.util.AppConstants;
+import com.windmill.rentalservice.util.Utility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +20,8 @@ public class InventoryService {
     private final ToolQuantityRepository toolQuantityRepository;
 
     @Autowired
-    public InventoryService(ToolQuantityRepository toolQuantityRepository) {
+    public InventoryService(ToolQuantityRepository toolQuantityRepository, ToolRepository toolRepository) {
+
         this.toolQuantityRepository = toolQuantityRepository;
     }
 
@@ -34,7 +37,7 @@ public class InventoryService {
         ToolQuantity toolQuantity = toolQuantityRepository.findByToolId(toolId)
                 .orElseThrow(() -> new RuntimeException(AppConstants.TOOL_NOT_FOUND + toolId));
         if (toolQuantity.getInStockCount() <= 0) {
-            throw new RentalCreationException(AppConstants.TOOL_NOT_AVAILABLE);
+            throw new RentalCreationException(AppConstants.TOOL_NOT_AVAILABLE + Utility.longOrMinusOne(toolId));
         }
         toolQuantity.setInStockCount(toolQuantity.getInStockCount() - 1);
         return toolQuantityRepository.save(toolQuantity);
@@ -49,7 +52,7 @@ public class InventoryService {
     @Transactional(readOnly = false)
     public ToolQuantity returnTool(Long toolId) {
         ToolQuantity toolQuantity = toolQuantityRepository.findByToolId(toolId)
-                .orElseThrow(() -> new RuntimeException(AppConstants.TOOL_NOT_FOUND + toolId));
+                .orElseThrow(() -> new RuntimeException(AppConstants.TOOL_NOT_FOUND + Utility.longOrMinusOne(toolId)));
         toolQuantity.setInStockCount(toolQuantity.getInStockCount() + 1);
         return toolQuantityRepository.save(toolQuantity);
     }

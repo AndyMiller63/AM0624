@@ -9,6 +9,14 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class Utility {
+
+
+    public static long longOrMinusOne(Long val) {
+        if (val == null) {
+            return -1;
+        }
+        return val.longValue();
+    }
     public static String currencyFormat(BigDecimal n) {
         if (n == null) {
             return "null";
